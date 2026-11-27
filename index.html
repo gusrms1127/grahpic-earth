@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>위도와 경도로 만든 3D 지구</title>
+<style>
+body{margin:0;background:#101720;color:#eee;font-family:Arial,'Noto Sans CJK KR',sans-serif}main{max-width:1000px;margin:auto;padding:24px}h1{font-size:24px;margin:0 0 8px}p{color:#bbc7d5;line-height:1.6;font-size:14px}canvas{display:block;width:100%;height:560px;background:#080e16;border:1px solid #344252;box-sizing:border-box}.controls{display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding:18px 0}label{font-size:14px;display:flex;gap:8px;align-items:center}input{width:130px}button{padding:8px 16px;cursor:pointer}output{min-width:44px}#error{color:#ffb9ac}#stats{font-size:13px}@media(max-width:600px){main{padding:16px}canvas{height:420px}}
+</style>
+</head>
+<body><main>
+<h1>위도와 경도로 만든 3D 지구</h1>
+<p>NASA 공개 고도 이미지 기반 지형 · 높이는 시각적으로 과장하며 정밀 측량용이 아닙니다.</p>
+<canvas id="gl-canvas" aria-label="회전하는 지구 모형"></canvas>
+<div class="controls">
+<button id="pause">회전 정지</button>
+<button id="reset">초기화</button>
+<label>회전 속도 <input id="speed" type="range" min="0" max="60" step="5" value="15"><output id="speed-value">15°/s</output></label>
+<label>고도 배율 <input id="height" type="range" min="0" max="100" value="40"><output id="height-value">40배</output></label>
+<label>빛 방향 <input id="light" type="range" min="-180" max="180" value="35"><output id="light-value">35°</output></label>
+</div>
+<p id="stats"></p><p id="error" role="alert"></p>
+<p>고도 배율을 0으로 설정하면 기본 구를 볼 수 있습니다. 회전을 멈춘 뒤 빛 방향을 움직이면 조명만의 변화를 확인할 수 있습니다.</p>
+</main>
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 aPosition;
+attribute vec3 aNormal;
+attribute vec3 aColor;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
+varying vec3 vNormal;
+varying vec3 vColor;
+void main() {
+    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+    vNormal = mat3(uModel) * aNormal;
+    vColor = aColor;
+}
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec3 uLightDirection;
+varying vec3 vNormal;
+varying vec3 vColor;
+void main() {
+    vec3 normal = normalize(vNormal);
+    vec3 light = normalize(uLightDirection);
+    float diffuse = max(dot(normal, light), 0.0);
+    float brightness = 0.16 + 0.84 * diffuse;
+    gl_FragColor = vec4(vColor * brightness, 1.0);
+}
+</script>
+<script src="data/height-data.js"></script>
+<script src="earth.js"></script>
+</body></html>

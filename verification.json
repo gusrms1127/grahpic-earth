@@ -1,0 +1,10 @@
+{
+  "vertexCount": 96120,
+  "triangles": 32040,
+  "maxNormalError": 4.60209427233238e-8,
+  "minNormalDot": 0.2581826039837063,
+  "seamError": 2.4492935982947064e-16,
+  "zeroRadiusError": 2.220446049250313e-16,
+  "maxHeight": 5797.64705882353,
+  "browserVerification": "Not performed: local browser executable unavailable; file URL preview blocked"
+}
