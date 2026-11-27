@@ -1,6 +1,5 @@
 'use strict';
 
-// 고도 배열은 data/height-data.js에서 읽는다.
 const earthRadius = 6371000;
 const latitudeSteps = 90;
 const longitudeSteps = 180;
@@ -14,7 +13,6 @@ function radians(degrees) {
     return degrees * Math.PI / 180;
 }
 
-// 위도와 경도를 단위 구의 위치로 변환한다.
 function unitPosition(latitude, longitude) {
     const lat = radians(latitude);
     const lon = radians(longitude);
@@ -38,7 +36,6 @@ function normalize(v) {
     return v.map(value => value / length);
 }
 
-// 경도는 가로, 위도는 세로 위치로 바꾼다. 인접한 네 표본을 선형 보간한다.
 function getHeight(latitude, longitude) {
     const x = ((longitude + 180) % 360 + 360) % 360;
     const y = Math.max(0, Math.min(180, 90 - latitude));
@@ -51,7 +48,6 @@ function getHeight(latitude, longitude) {
     const d = HEIGHT_VALUES[y1 * HEIGHT_WIDTH + x1];
     const top = a * (1 - tx) + b * tx;
     const bottom = c * (1 - tx) + d * tx;
-    // NASA의 0~6400m 스케일로 근사 환산한다. 원본 JPEG의 양자화 오차가 있다.
     return (top * (1 - ty) + bottom * ty) / 255 * 6400;
 }
 
@@ -91,7 +87,6 @@ function makeEarth() {
         const row = [];
         const latitude = -90 + i*180/latitudeSteps;
         for (let j=0; j<=longitudeSteps; j++) {
-            // 마지막 경도를 -180과 동일하게 만들어 이음매를 일치시킨다.
             const longitude = j === longitudeSteps ? -180 : -180+j*360/longitudeSteps;
             row.push({position:getPosition(latitude, longitude, scale), color:getColor(latitude, longitude)});
         }
@@ -100,7 +95,6 @@ function makeEarth() {
     for (let i=0; i<latitudeSteps; i++) {
         for (let j=0; j<longitudeSteps; j++) {
             const a=grid[i][j], b=grid[i+1][j], c=grid[i][j+1], d=grid[i+1][j+1];
-            // 극점에서 면적이 0이 되는 삼각형은 제외한다.
             if (i !== 0) triangle(a,b,c);
             if (i !== latitudeSteps-1) triangle(c,b,d);
         }
@@ -110,8 +104,6 @@ function makeEarth() {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
     }
-    document.getElementById('stats').textContent =
-        `NASA 고도 격자 1° / 지구 격자 2° · 삼각형 ${(vertexCount/3).toLocaleString()}개 · 면별 법선 사용`;
 }
 
 function compileShader(id, type) {
